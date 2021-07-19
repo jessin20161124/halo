@@ -51,7 +51,7 @@ public class FileUtils {
         Assert.notNull(source, "Source path must not be null");
         Assert.notNull(target, "Target path must not be null");
 
-        Files.walkFileTree(source, new SimpleFileVisitor<>() {
+        Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
 
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
@@ -309,9 +309,9 @@ public class FileUtils {
         log.debug("Trying to find path from [{}]", path);
 
         // the queue holds folders which may be root
-        final var queue = new LinkedList<Path>();
+        final LinkedList<Path> queue = new LinkedList<Path>();
         // depth container
-        final var depthQueue = new LinkedList<Integer>();
+        final LinkedList<Integer> depthQueue = new LinkedList<Integer>();
 
         // init queue
         queue.push(path);
@@ -321,14 +321,14 @@ public class FileUtils {
         Path result = null;
         while (!found && !queue.isEmpty()) {
             // pop the first path as candidate root path
-            final var rootPath = queue.pop();
+            final Path rootPath = queue.pop();
             final int depth = depthQueue.pop();
             if (log.isDebugEnabled()) {
                 log.debug("Peek({}) into {}", depth, rootPath);
             }
             try (final Stream<Path> childrenPaths = Files.list(rootPath)) {
-                final var subFolders = new LinkedList<Path>();
-                var resultPath = childrenPaths
+                final LinkedList<Path> subFolders = new LinkedList<Path>();
+                Optional<Path> resultPath = childrenPaths
                     .peek(p -> {
                         if (Files.isDirectory(p)) {
                             subFolders.add(p);
@@ -507,7 +507,7 @@ public class FileUtils {
      */
     @NonNull
     public static Path createTempDirectory() throws IOException {
-        final var tempDirectory = Files.createTempDirectory("halo");
+        final Path tempDirectory = Files.createTempDirectory("halo");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> deleteFolderQuietly(tempDirectory)));
         return tempDirectory;
     }

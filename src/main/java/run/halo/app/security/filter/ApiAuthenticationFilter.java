@@ -91,7 +91,7 @@ public class ApiAuthenticationFilter extends AbstractAuthenticationFilter {
         Optional<String> optionalAccessKey =
             optionService.getByProperty(ApiProperties.API_ACCESS_KEY, String.class);
 
-        if (optionalAccessKey.isEmpty()) {
+        if (!optionalAccessKey.isPresent()) {
             // If the access key is not set
             throw new AuthenticationException("API access key hasn't been set by blogger");
         }

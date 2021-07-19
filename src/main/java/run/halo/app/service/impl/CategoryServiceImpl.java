@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -223,7 +224,7 @@ public class CategoryServiceImpl extends AbstractCrudService<Category, Integer>
     @Override
     public Category getBySlug(String slug) {
         Optional<Category> bySlug = categoryRepository.getBySlug(slug);
-        if (bySlug.isEmpty()) {
+        if (StringUtils.isBlank(slug)) {
             return null;
         }
 
@@ -263,7 +264,7 @@ public class CategoryServiceImpl extends AbstractCrudService<Category, Integer>
     @Override
     public Category getByName(String name) {
         Optional<Category> byName = categoryRepository.getByName(name);
-        if (byName.isEmpty()) {
+        if (!byName.isPresent()) {
             return null;
         }
 

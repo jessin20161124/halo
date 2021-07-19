@@ -51,7 +51,7 @@ public class ThemeFetcherComposite implements ThemeFetcher {
 
     @Override
     public ThemeProperty fetch(Object source) {
-        final var themeFetcher = getThemeFetcher(source).orElse(fallbackFetcher);
+        final ThemeFetcher themeFetcher = getThemeFetcher(source).orElse(fallbackFetcher);
         return themeFetcher.fetch(source);
     }
 

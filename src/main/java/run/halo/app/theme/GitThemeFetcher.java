@@ -1,10 +1,14 @@
 package run.halo.app.theme;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.TagOpt;
 import run.halo.app.exception.ThemePropertyMissingException;
 import run.halo.app.handler.theme.config.support.ThemeProperty;
@@ -29,15 +33,15 @@ public class GitThemeFetcher implements ThemeFetcher {
 
     @Override
     public ThemeProperty fetch(Object source) {
-        final var repoUrl = source.toString();
+        final String repoUrl = source.toString();
 
         try {
             // create temp folder
-            final var tempDirectory = FileUtils.createTempDirectory();
+            final Path tempDirectory = FileUtils.createTempDirectory();
 
             // clone from git
             log.info("Cloning git repo {} to {}", repoUrl, tempDirectory);
-            try (final var git = Git.cloneRepository()
+            try (final Git git = Git.cloneRepository()
                 .setTagOption(TagOpt.FETCH_TAGS)
                 .setNoCheckout(false)
                 .setDirectory(tempDirectory.toFile())
@@ -48,8 +52,8 @@ public class GitThemeFetcher implements ThemeFetcher {
                 log.info("Cloned git repo {} to {} successfully", repoUrl, tempDirectory);
 
                 // find latest tag
-                final var latestTag = GitUtils.getLatestTag(git);
-                final var checkoutCommand = git.checkout()
+                final Pair<Ref, RevCommit> latestTag = GitUtils.getLatestTag(git);
+                final CheckoutCommand checkoutCommand = git.checkout()
                     .setName("halo")
                     .setCreateBranch(true);
                 if (latestTag != null) {
@@ -61,12 +65,12 @@ public class GitThemeFetcher implements ThemeFetcher {
             }
 
             // locate theme property location
-            var themePropertyPath = ThemeMetaLocator.INSTANCE.locateProperty(tempDirectory)
+            Path themePropertyPath = ThemeMetaLocator.INSTANCE.locateProperty(tempDirectory)
                 .orElseThrow(() -> new ThemePropertyMissingException("主题配置文件缺失，请确认后重试！"));
 
             // fetch property
             return ThemePropertyScanner.INSTANCE.fetchThemeProperty(themePropertyPath.getParent())
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("bad"));
         } catch (IOException | GitAPIException e) {
             throw new RuntimeException("主题拉取失败！（" + e.getMessage() + "）", e);
         }

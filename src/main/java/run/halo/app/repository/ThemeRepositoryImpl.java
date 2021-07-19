@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
+import org.springframework.expression.ExpressionException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
@@ -116,7 +117,7 @@ public class ThemeRepositoryImpl
     @Override
     public void setActivatedTheme(@NonNull String themeId) {
         Assert.hasText(themeId, "Theme id must not be blank");
-        final var newThemeOption = optionRepository.findByKey(THEME.getValue())
+        final Option newThemeOption = optionRepository.findByKey(THEME.getValue())
             .map(themeOption -> {
                 // set theme id
                 themeOption.setValue(themeId);
@@ -131,7 +132,7 @@ public class ThemeRepositoryImpl
     @Override
     public ThemeProperty attemptToAdd(ThemeProperty newProperty) {
         // 1. check existence
-        final var alreadyExist = fetchThemeByThemeId(newProperty.getId()).isPresent();
+        final boolean alreadyExist = fetchThemeByThemeId(newProperty.getId()).isPresent();
         if (alreadyExist) {
             throw new AlreadyExistsException("当前安装的主题已存在");
         }
@@ -144,8 +145,8 @@ public class ThemeRepositoryImpl
         }
 
         // 3. move the temp folder into templates/themes/{theme_id}
-        final var sourceThemePath = Paths.get(newProperty.getThemePath());
-        final var targetThemePath =
+        Path sourceThemePath = Paths.get(newProperty.getThemePath());
+        final Path targetThemePath =
             getThemeRootPath().resolve(newProperty.getId());
 
         // 4. clear target theme folder firstly
@@ -168,19 +169,19 @@ public class ThemeRepositoryImpl
         }
 
         // or else throw should never happen
-        return ThemePropertyScanner.INSTANCE.fetchThemeProperty(targetThemePath).orElseThrow();
+        return ThemePropertyScanner.INSTANCE.fetchThemeProperty(targetThemePath).orElseThrow(() -> new RuntimeException("bad"));
     }
 
     @Override
     public void deleteTheme(String themeId) {
-        final var themeProperty = fetchThemePropertyByThemeId(themeId)
+        final ThemeProperty themeProperty = fetchThemePropertyByThemeId(themeId)
             .orElseThrow(() -> new NotFoundException("主题 ID 为 " + themeId + " 不存在或已删除！"));
         deleteTheme(themeProperty);
     }
 
     @Override
     public void deleteTheme(ThemeProperty themeProperty) {
-        final var themePath = Paths.get(themeProperty.getThemePath());
+        final Path themePath = Paths.get(themeProperty.getThemePath());
         try {
             FileUtils.deleteFolder(themePath);
         } catch (IOException e) {
@@ -216,7 +217,7 @@ public class ThemeRepositoryImpl
 
     @NonNull
     protected Optional<ThemeProperty> fetchThemeByThemeId(String themeId) {
-        return ThemePropertyScanner.INSTANCE.scan(getThemeRootPath(), null)
+        return ThemePropertyScanner.INSTANCE.scan(getThemeRootPath(), themeId)
             .stream()
             .filter(property -> Objects.equals(themeId, property.getId()))
             .findFirst();

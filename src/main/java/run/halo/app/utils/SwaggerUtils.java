@@ -33,7 +33,7 @@ public final class SwaggerUtils {
     public static Type customMixin(Class<?> clazz,
         List<Consumer<AlternateTypePropertyBuilder>> properties) {
         Assert.notNull(clazz, "Class must not be null");
-        final var typeBuilder = new AlternateTypeBuilder()
+        final AlternateTypeBuilder typeBuilder = new AlternateTypeBuilder()
             .fullyQualifiedClassName(
                 String.format("%s.generated.%s", clazz.getPackage().getName(),
                     clazz.getSimpleName()));
@@ -111,7 +111,7 @@ public final class SwaggerUtils {
         ignoredClasses.add(Authentication.class);
 
         classFor(User.class.getName()).ifPresent(ignoredClasses::add);
-        return ignoredClasses.toArray(Class[]::new);
+        return ignoredClasses.toArray(new Class[0]);
     }
 
 }

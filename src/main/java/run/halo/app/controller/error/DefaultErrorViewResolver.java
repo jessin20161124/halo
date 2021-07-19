@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.boot.autoconfigure.template.TemplateAvailabilityProvider;
 import org.springframework.boot.autoconfigure.template.TemplateAvailabilityProviders;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
 import org.springframework.context.ApplicationContext;
@@ -43,10 +44,10 @@ public class DefaultErrorViewResolver implements ErrorViewResolver {
     public ModelAndView resolveErrorView(HttpServletRequest request, HttpStatus status,
         Map<String, Object> model) {
         // for compatibility
-        var errorModel = new HashMap<>(model);
+        HashMap errorModel = new HashMap<>(model);
 
         // resolve with status code. eg: 400.ftl
-        var modelAndView = resolve(String.valueOf(status.value()), errorModel);
+        ModelAndView modelAndView = resolve(String.valueOf(status.value()), errorModel);
 
         // resolve with status series. eg: 4xx.ftl
         if (modelAndView == null && SERIES_VIEWS.containsKey(status.series())) {
@@ -67,8 +68,8 @@ public class DefaultErrorViewResolver implements ErrorViewResolver {
     }
 
     private ModelAndView resolve(String viewName, Map<String, Object> model) {
-        var errorViewName = this.themeService.render(viewName);
-        var provider =
+        String errorViewName = this.themeService.render(viewName);
+        TemplateAvailabilityProvider provider =
             this.templateAvailabilityProviders.getProvider(errorViewName, this.applicationContext);
         if (provider != null) {
             return new ModelAndView(errorViewName, model);

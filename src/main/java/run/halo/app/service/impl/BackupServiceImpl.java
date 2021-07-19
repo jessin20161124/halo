@@ -424,7 +424,7 @@ public class BackupServiceImpl implements BackupService {
 
         ObjectMapper mapper = JsonUtils.createDefaultJsonMapper();
         TypeReference<HashMap<String, Object>> typeRef =
-            new TypeReference<>() {
+            new TypeReference<HashMap<String, Object>>() {
             };
         HashMap<String, Object> data = mapper.readValue(jsonContent, typeRef);
 

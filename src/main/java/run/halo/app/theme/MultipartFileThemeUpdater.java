@@ -1,6 +1,7 @@
 package run.halo.app.theme;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,11 +35,11 @@ public class MultipartFileThemeUpdater implements ThemeUpdater {
     @Override
     public ThemeProperty update(String themeId) throws IOException {
         // check old theme id
-        final var oldThemeProperty = this.themeRepository.fetchThemePropertyByThemeId(themeId)
+        final ThemeProperty oldThemeProperty = this.themeRepository.fetchThemePropertyByThemeId(themeId)
                 .orElseThrow(() -> new NotFoundException("主题 ID 为 " + themeId + " 不存在或已删除！"));
 
         // fetch new theme
-        final var newThemeProperty = this.fetcherComposite.fetch(this.file);
+        final ThemeProperty newThemeProperty = this.fetcherComposite.fetch(this.file);
 
         if (!Objects.equals(oldThemeProperty.getId(), newThemeProperty.getId())) {
             log.error("Expected theme: {}, but provided theme: {}",
@@ -54,7 +55,7 @@ public class MultipartFileThemeUpdater implements ThemeUpdater {
         }
 
         // backup old theme
-        final var backupPath = ThemeUpdater.backup(oldThemeProperty);
+        final Path backupPath = ThemeUpdater.backup(oldThemeProperty);
 
         try {
             // delete  old theme

@@ -1,6 +1,6 @@
 package run.halo.app.config.attributeconverter;
 
-import static java.util.stream.Collectors.toUnmodifiableSet;
+// import static java.util.stream.Collectors.toUnmodifiableSet;
 
 import java.util.Set;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -11,6 +11,8 @@ import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
 import org.springframework.util.ClassUtils;
 import run.halo.app.model.enums.ValueEnum;
 import run.halo.app.model.properties.PropertyEnum;
+
+import static org.springframework.data.util.StreamUtils.toUnmodifiableSet;
 
 /**
  * Attribute converter persistence unit post processor.
@@ -30,7 +32,7 @@ class AutoGenerateConverterPersistenceUnitPostProcessor implements PersistenceUn
 
     @Override
     public void postProcessPersistenceUnitInfo(MutablePersistenceUnitInfo pui) {
-        var generator = new AttributeConverterAutoGenerator(factory.getBeanClassLoader());
+        AttributeConverterAutoGenerator generator = new AttributeConverterAutoGenerator(factory.getBeanClassLoader());
 
         findValueEnumClasses()
             .stream()
@@ -40,7 +42,7 @@ class AutoGenerateConverterPersistenceUnitPostProcessor implements PersistenceUn
     }
 
     private Set<Class<?>> findValueEnumClasses() {
-        var scanner = new ClassPathScanningCandidateComponentProvider(false);
+        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
         // include ValueEnum class
         scanner.addIncludeFilter(new AssignableTypeFilter(ValueEnum.class));
         // exclude PropertyEnum class

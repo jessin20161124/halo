@@ -37,7 +37,7 @@ curl -L https://github.com/halo-dev/halo/releases/download/v1.4.8/halo-1.4.8.jar
 ```bash
 java -jar halo.jar
 ```
-
+   需要在/Users/{user}/.halo/templates/themes下添加默认的主题
 ### Docker
 
 ```bash

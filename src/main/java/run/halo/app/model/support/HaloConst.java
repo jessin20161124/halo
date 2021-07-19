@@ -46,7 +46,7 @@ public class HaloConst {
     /**
      * Default theme name.
      */
-    public static final String DEFAULT_THEME_ID = "caicai_anatole";
+    public static final String DEFAULT_THEME_ID = "bao";
 
     /**
      * Default error path.

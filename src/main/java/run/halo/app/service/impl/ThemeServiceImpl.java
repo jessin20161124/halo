@@ -134,7 +134,7 @@ public class ThemeServiceImpl implements ThemeService {
                     StringUtils.startsWithIgnoreCase(path.getFileName().toString(), prefix))
                     .map(path -> {
                         // Remove prefix
-                        final var customTemplate = StringUtils
+                        final String customTemplate = StringUtils
                             .removeStartIgnoreCase(path.getFileName().toString(), prefix);
                         // Remove suffix
                         return StringUtils
@@ -182,7 +182,8 @@ public class ThemeServiceImpl implements ThemeService {
         // Read file
         Path path = Paths.get(absolutePath);
         try {
-            return Files.readString(path);
+            byte[] bytes = Files.readAllBytes(path);
+            return new String(bytes);
         } catch (IOException e) {
             throw new ServiceException("读取模板内容失败 " + absolutePath, e);
         }
@@ -196,7 +197,8 @@ public class ThemeServiceImpl implements ThemeService {
         // Read file
         Path path = Paths.get(absolutePath);
         try {
-            return Files.readString(path);
+            byte[] bytes = Files.readAllBytes(path);
+            return new String(bytes);
         } catch (IOException e) {
             throw new ServiceException("读取模板内容失败 " + absolutePath, e);
         }
@@ -282,7 +284,8 @@ public class ThemeServiceImpl implements ThemeService {
                 }
 
                 // Read the yaml file
-                String optionContent = Files.readString(optionsPath);
+                byte[] bytes = Files.readAllBytes(optionsPath);
+                String optionContent = new String(bytes);
 
                 // Resolve it
                 return themeConfigResolver.resolve(optionContent);
@@ -296,13 +299,13 @@ public class ThemeServiceImpl implements ThemeService {
 
     @Override
     public String render(String pageName) {
-        var folderName = getActivatedTheme().getFolderName();
+        String folderName = getActivatedTheme().getFolderName();
         return "themes/" + folderName + "/" + pageName;
     }
 
     @Override
     public String renderWithSuffix(String pageName) {
-        var folderName = getActivatedTheme().getFolderName();
+        String folderName = getActivatedTheme().getFolderName();
         return "themes/" + folderName + "/" + pageName + ".ftl";
     }
 
@@ -315,7 +318,7 @@ public class ThemeServiceImpl implements ThemeService {
     @Override
     @NonNull
     public ThemeProperty getActivatedTheme() {
-        return fetchActivatedTheme().orElseThrow();
+        return fetchActivatedTheme().orElseThrow(() -> new RuntimeException("bad"));
     }
 
     @Override
@@ -344,7 +347,7 @@ public class ThemeServiceImpl implements ThemeService {
     public ThemeProperty upload(@NonNull MultipartFile file) {
         Assert.notNull(file, "Multipart file must not be null");
 
-        final var newThemeProperty = this.fetcherComposite.fetch(file);
+        final ThemeProperty newThemeProperty = this.fetcherComposite.fetch(file);
         return this.themeRepository.attemptToAdd(newThemeProperty);
     }
 
@@ -352,7 +355,7 @@ public class ThemeServiceImpl implements ThemeService {
     public ThemeProperty fetch(@NonNull String uri) {
         Assert.hasText(uri, "Theme remote uri must not be blank");
 
-        final var themeProperty = fetcherComposite.fetch(uri);
+        final ThemeProperty themeProperty = fetcherComposite.fetch(uri);
         return this.themeRepository.attemptToAdd(themeProperty);
     }
 
@@ -363,11 +366,11 @@ public class ThemeServiceImpl implements ThemeService {
 
     @Override
     public ThemeProperty update(String themeId) {
-        final var themeUpdater = new GitThemeUpdater(themeRepository, fetcherComposite);
+        final GitThemeUpdater themeUpdater = new GitThemeUpdater(themeRepository, fetcherComposite);
         Assert.hasText(themeId, "Theme id must not be blank");
 
         try {
-            final var themeProperty = themeUpdater.update(themeId);
+            final ThemeProperty themeProperty = themeUpdater.update(themeId);
         } catch (Exception e) {
             if (e instanceof ThemeNotSupportException) {
                 throw (ThemeNotSupportException) e;
@@ -385,7 +388,7 @@ public class ThemeServiceImpl implements ThemeService {
         Assert.hasText(themeId, "Theme id must not be blank");
         Assert.notNull(file, "Theme file must not be null");
 
-        final var themeUpdater =
+        final MultipartFileThemeUpdater themeUpdater =
             new MultipartFileThemeUpdater(file, fetcherComposite, themeRepository);
         try {
             return themeUpdater.update(themeId);

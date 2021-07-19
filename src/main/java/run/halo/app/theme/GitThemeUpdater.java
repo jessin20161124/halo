@@ -8,11 +8,16 @@ import static run.halo.app.utils.GitUtils.removeRemoteIfExists;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RebaseCommand;
+import org.eclipse.jgit.api.RebaseResult;
+import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.RepositoryState;
+import org.eclipse.jgit.transport.FetchResult;
+import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import run.halo.app.exception.NotFoundException;
 import run.halo.app.exception.ServiceException;
@@ -40,21 +45,21 @@ public class GitThemeUpdater implements ThemeUpdater {
     @Override
     public ThemeProperty update(String themeId) throws IOException {
         // get theme property
-        final var oldThemeProperty = themeRepository.fetchThemePropertyByThemeId(themeId)
+        final ThemeProperty oldThemeProperty = themeRepository.fetchThemePropertyByThemeId(themeId)
             .orElseThrow(
                 () -> new NotFoundException("主题 " + themeId + " 不存在或以删除！").setErrorData(themeId));
 
         // get update config
-        final var gitRepo = oldThemeProperty.getRepo();
+        final String gitRepo = oldThemeProperty.getRepo();
 
         // fetch latest theme
-        final var newThemeProperty = fetcherComposite.fetch(gitRepo);
+        final ThemeProperty newThemeProperty = fetcherComposite.fetch(gitRepo);
 
         // merge old theme and new theme
-        final var mergedThemeProperty = merge(oldThemeProperty, newThemeProperty);
+        final ThemeProperty mergedThemeProperty = merge(oldThemeProperty, newThemeProperty);
 
         // backup old theme
-        final var backupPath = backup(oldThemeProperty);
+        final Path backupPath = backup(oldThemeProperty);
 
         try {
             // delete old theme
@@ -74,19 +79,19 @@ public class GitThemeUpdater implements ThemeUpdater {
     public ThemeProperty merge(ThemeProperty oldThemeProperty, ThemeProperty newThemeProperty)
         throws IOException {
 
-        final var oldThemePath = Paths.get(oldThemeProperty.getThemePath());
+        final Path oldThemePath = Paths.get(oldThemeProperty.getThemePath());
         // open old git repo
-        try (final var oldGit = Git.open(oldThemePath.toFile())) {
+        try (final Git oldGit = Git.open(oldThemePath.toFile())) {
             // 0. commit old repo
             commitAutomatically(oldGit);
 
-            final var newThemePath = Paths.get(newThemeProperty.getThemePath());
+            final Path newThemePath = Paths.get(newThemeProperty.getThemePath());
             // trying to open new git repo
-            try (final var ignored = Git.open(newThemePath.toFile())) {
+            try (final Git ignored = Git.open(newThemePath.toFile())) {
                 // remove remote
                 removeRemoteIfExists(oldGit, "newTheme");
                 // add this new git to remote for old repo
-                final var addedRemoteConfig = oldGit.remoteAdd()
+                final RemoteConfig addedRemoteConfig = oldGit.remoteAdd()
                     .setName("newTheme")
                     .setUri(new URIish(newThemePath.toString()))
                     .call();
@@ -95,16 +100,16 @@ public class GitThemeUpdater implements ThemeUpdater {
                     addedRemoteConfig.getURIs());
 
                 // fetch remote data
-                final var remote = "newTheme/halo";
+                final String remote = "newTheme/halo";
                 log.info("git fetch newTheme/halo");
-                final var fetchResult = oldGit.fetch()
+                final FetchResult fetchResult = oldGit.fetch()
                     .setRemote("newTheme")
                     .call();
                 log.info("Fetch result: {}", fetchResult.getMessages());
 
                 // rebase upstream
                 log.info("git rebase newTheme");
-                final var rebaseResult = oldGit.rebase()
+                final RebaseResult rebaseResult = oldGit.rebase()
                     .setUpstream(remote)
                     .call();
                 log.info("Rebase result: {}", rebaseResult.getStatus());
@@ -116,7 +121,7 @@ public class GitThemeUpdater implements ThemeUpdater {
                         // if rebasing stopped or failed, you can get back to the original state by
                         // running it
                         // with setOperation(RebaseCommand.Operation.ABORT)
-                        final var abortRebaseResult = oldGit.rebase()
+                        final RebaseResult abortRebaseResult = oldGit.rebase()
                             .setUpstream(remote)
                             .setOperation(RebaseCommand.Operation.ABORT)
                             .call();

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import run.halo.app.cache.lock.CacheLock;
@@ -255,9 +256,9 @@ public class ContentContentController {
     }
 
     private NotFoundException buildPathNotFoundException() {
-        var requestAttributes = RequestContextHolder.currentRequestAttributes();
+        RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
 
-        var requestUri = "";
+        String requestUri = "";
         if (requestAttributes instanceof ServletRequestAttributes) {
             requestUri =
                 ((ServletRequestAttributes) requestAttributes).getRequest().getRequestURI();

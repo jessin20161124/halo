@@ -36,7 +36,7 @@ public interface ThemeUpdater {
      * @throws IOException throws io exception
      */
     static Path backup(final ThemeProperty themeProperty) throws IOException {
-        final var themePath = Paths.get(themeProperty.getThemePath());
+        final Path themePath = Paths.get(themeProperty.getThemePath());
         Path tempDirectory = null;
         try {
             tempDirectory = FileUtils.createTempDirectory();
@@ -52,7 +52,7 @@ public interface ThemeUpdater {
 
     static void restore(final Path backupPath, final ThemeProperty oldThemeProperty)
         throws IOException {
-        final var targetPath = Paths.get(oldThemeProperty.getThemePath());
+        final Path targetPath = Paths.get(oldThemeProperty.getThemePath());
         log.info("Restoring backup path: {} to target path: {}", backupPath, targetPath);
         // copy backup to target path
         FileUtils.copyFolder(backupPath, targetPath);

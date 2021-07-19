@@ -3,6 +3,7 @@ package run.halo.app.theme;
 import static run.halo.app.utils.FileUtils.unzip;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.zip.ZipInputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,7 +23,7 @@ public class MultipartZipFileThemeFetcher implements ThemeFetcher {
     @Override
     public boolean support(Object source) {
         if (source instanceof MultipartFile) {
-            final var filename = ((MultipartFile) source).getOriginalFilename();
+            final String filename = ((MultipartFile) source).getOriginalFilename();
             return filename != null && filename.endsWith(".zip");
         }
         return false;
@@ -30,10 +31,10 @@ public class MultipartZipFileThemeFetcher implements ThemeFetcher {
 
     @Override
     public ThemeProperty fetch(Object source) {
-        final var file = (MultipartFile) source;
+        final MultipartFile file = (MultipartFile) source;
 
-        try (var zis = new ZipInputStream(file.getInputStream())) {
-            final var tempDirectory = FileUtils.createTempDirectory();
+        try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
+            final Path tempDirectory = FileUtils.createTempDirectory();
             log.info("Unzipping {} to path {}", file.getOriginalFilename(), tempDirectory);
             unzip(zis, tempDirectory);
             return ThemePropertyScanner.INSTANCE.fetchThemeProperty(tempDirectory)

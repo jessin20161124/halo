@@ -107,7 +107,7 @@ public class HaloMvcConfiguration implements WebMvcConfigurer {
         CommonsMultipartResolver resolver = new CommonsMultipartResolver() {
             @Override
             public boolean isMultipart(@NonNull HttpServletRequest request) {
-                final var method = request.getMethod();
+                final String method = request.getMethod();
                 if (!"POST".equalsIgnoreCase(method) && !"PUT".equalsIgnoreCase(method)) {
                     return false;
                 }
@@ -117,7 +117,7 @@ public class HaloMvcConfiguration implements WebMvcConfigurer {
         resolver.setDefaultEncoding("UTF-8");
         resolver.setMaxUploadSize(multipartConfigElement.getMaxRequestSize());
         resolver.setMaxUploadSizePerFile(multipartConfigElement.getMaxFileSize());
-        var location = multipartProperties.getLocation();
+        String location = multipartProperties.getLocation();
         if (StringUtils.hasText(location)) {
             FileUrlResource resource = new FileUrlResource(location);
             resolver.setUploadTempDir(resource);

@@ -1,11 +1,14 @@
 package run.halo.app.service.impl;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.google.common.collect.ImmutableSet;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import run.halo.app.model.properties.AliOssProperties;
@@ -39,7 +42,7 @@ public class OptionFilter {
     }
 
     private Set<String> getDefaultPrivateOptionKeys() {
-        return Set.of(
+        return ImmutableSet.of(
             AliOssProperties.OSS_DOMAIN.getValue(),
             AliOssProperties.OSS_BUCKET_NAME.getValue(),
             AliOssProperties.OSS_ACCESS_KEY.getValue(),
@@ -93,11 +96,15 @@ public class OptionFilter {
         // resolve configured private option names
         return optionService.getByKey(HaloConst.PRIVATE_OPTION_KEY, String.class)
             .map(privateOptions -> privateOptions.split(","))
-            .map(Set::of)
+            .map((sets) -> {
+                Set<String> set = new HashSet<String>();
+                Arrays.stream(sets).forEach(ele -> {set.add(ele);});
+                return set;
+            })
             .orElse(Collections.emptySet())
             .stream()
             .map(String::trim)
-            .collect(Collectors.toUnmodifiableSet());
+            .collect(Collectors.toSet());
     }
 
     /**
@@ -113,10 +120,10 @@ public class OptionFilter {
 
         return optionKeys.stream()
             .filter(Objects::nonNull)
-            .filter(optionKey -> !optionKey.isBlank())
+            .filter(optionKey -> {optionKey = optionKey.trim(); return !optionKey.isEmpty();})
             .filter(optionKey -> !defaultPrivateOptionKeys.contains(optionKey))
             .filter(optionKey -> !getConfiguredPrivateOptionKeys().contains(optionKey))
-            .collect(Collectors.toUnmodifiableSet());
+            .collect(Collectors.toSet());
     }
 
     /**

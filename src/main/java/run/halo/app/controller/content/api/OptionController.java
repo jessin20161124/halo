@@ -1,12 +1,14 @@
 package run.halo.app.controller.content.api;
 
 import static java.util.stream.Collectors.toMap;
+import static org.springframework.data.util.StreamUtils.toUnmodifiableSet;
 
 import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -43,21 +45,21 @@ public class OptionController {
     @GetMapping("list_view")
     @ApiOperation("Lists all options with list view")
     public List<OptionDTO> listAll() {
-        var options = optionService.listDtos();
-        var optionMap = options.stream()
+        List<OptionDTO> options = optionService.listDtos();
+        Map<String, OptionDTO> optionMap = options.stream()
             .collect(toMap(OptionDTO::getKey, option -> option));
-        var keys = options.stream()
+        Set<String> keys = options.stream()
             .map(OptionDTO::getKey)
-            .collect(Collectors.toUnmodifiableSet());
+            .collect(toUnmodifiableSet());
         return optionFilter.filter(keys).stream()
             .map(optionMap::get)
-            .collect(Collectors.toUnmodifiableList());
+            .collect(Collectors.toList());
     }
 
     @GetMapping("map_view")
     @ApiOperation("Lists options with map view")
     public Map<String, Object> listAllWithMapView(
-        @Deprecated(since = "1.4.8", forRemoval = true)
+        @Deprecated//(since = "1.4.8", forRemoval = true)
         @RequestParam(value = "key", required = false) List<String> keyList,
         @RequestParam(value = "keys", required = false) String keys) {
         // handle for key list
@@ -66,10 +68,10 @@ public class OptionController {
         }
         // handle for keys
         if (StringUtils.hasText(keys)) {
-            var nameSet = Arrays.stream(keys.split(","))
+            Set<String> nameSet = Arrays.stream(keys.split(","))
                 .map(String::trim)
-                .collect(Collectors.toUnmodifiableSet());
-            var filteredNames = optionFilter.filter(nameSet);
+                .collect(Collectors.toSet());
+            Set<String> filteredNames = optionFilter.filter(nameSet);
             return optionService.listOptions(filteredNames);
         }
         // list all

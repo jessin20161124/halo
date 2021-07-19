@@ -146,7 +146,7 @@ public class SwaggerConfiguration {
             SecurityContext.builder()
                 .securityReferences(adminApiAuths())
                 .operationSelector(operationContext -> {
-                    var requestMappingPattern = operationContext.requestMappingPattern();
+                    String requestMappingPattern = operationContext.requestMappingPattern();
                     return pathMatcher.match("/api/admin/**/*", requestMappingPattern);
                 })
                 .build()
@@ -166,7 +166,7 @@ public class SwaggerConfiguration {
             SecurityContext.builder()
                 .securityReferences(contentApiAuths())
                 .operationSelector(operationContext -> {
-                    var requestMappingPattern = operationContext.requestMappingPattern();
+                    String requestMappingPattern = operationContext.requestMappingPattern();
                     return pathMatcher.match("/api/content/**/*", requestMappingPattern);
                 })
                 .build()

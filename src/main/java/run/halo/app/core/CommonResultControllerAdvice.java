@@ -15,6 +15,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import run.halo.app.model.support.BaseResponse;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Controller advice for comment result.
@@ -73,16 +74,16 @@ public class CommonResultControllerAdvice implements ResponseBodyAdvice<Object> 
         }
 
         // get status
-        var status = HttpStatus.OK;
+        HttpStatus status = HttpStatus.OK;
         if (response instanceof ServletServerHttpResponse) {
-            var servletResponse =
+            HttpServletResponse servletResponse =
                 ((ServletServerHttpResponse) response).getServletResponse();
             status = HttpStatus.resolve(servletResponse.getStatus());
             if (status == null) {
                 status = HttpStatus.INTERNAL_SERVER_ERROR;
             }
         }
-        var baseResponse = new BaseResponse<>(status.value(), status.getReasonPhrase(), returnBody);
+        BaseResponse baseResponse = new BaseResponse<>(status.value(), status.getReasonPhrase(), returnBody);
         bodyContainer.setValue(baseResponse);
     }
 

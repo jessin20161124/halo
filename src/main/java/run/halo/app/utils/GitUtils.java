@@ -58,20 +58,20 @@ public class GitUtils {
     @Nullable
     public static Pair<Ref, RevCommit> getLatestTag(final Git git)
         throws GitAPIException, IOException {
-        final var tags = git.tagList().call();
+        final List<Ref> tags = git.tagList().call();
         if (CollectionUtils.isEmpty(tags)) {
             return null;
         }
-        try (final var revWalk = new RevWalk(git.getRepository())) {
+        try (final RevWalk revWalk = new RevWalk(git.getRepository())) {
             revWalk.reset();
             revWalk.setTreeFilter(TreeFilter.ANY_DIFF);
             revWalk.sort(RevSort.TOPO, true);
             revWalk.sort(RevSort.COMMIT_TIME_DESC, true);
 
-            final var commitTagMap = new HashMap<RevCommit, Ref>(tags.size());
+            final HashMap<RevCommit, Ref> commitTagMap = new HashMap<RevCommit, Ref>(tags.size());
 
-            for (final var tag : tags) {
-                final var commit = revWalk.parseCommit(tag.getObjectId());
+            for (final Ref tag : tags) {
+                final RevCommit commit = revWalk.parseCommit(tag.getObjectId());
                 commitTagMap.put(commit, tag);
                 if (log.isDebugEnabled()) {
                     log.debug("tag: {} with commit: {} {}", tag.getName(),
@@ -88,13 +88,13 @@ public class GitUtils {
     }
 
     public static void removeRemoteIfExists(final Git git, String remote) throws GitAPIException {
-        final var remoteExists = git.remoteList()
+        final boolean remoteExists = git.remoteList()
             .call()
             .stream().map(RemoteConfig::getName)
             .anyMatch(name -> name.equals(remote));
         if (remoteExists) {
             // remove newRepo remote
-            final var removedRemoteConfig = git.remoteRemove()
+            final RemoteConfig removedRemoteConfig = git.remoteRemove()
                 .setRemoteName(remote)
                 .call();
             log.info("git remote remove {} {}", removedRemoteConfig.getName(),
@@ -115,8 +115,8 @@ public class GitUtils {
     public static void commitAutomatically(final Git git) throws GitAPIException, IOException {
         // git status
         if (git.status().call().isClean()) {
-            final var branch = git.getRepository().getBranch();
-            final var fullBranch = git.getRepository().getFullBranch();
+            final String branch = git.getRepository().getBranch();
+            final String fullBranch = git.getRepository().getFullBranch();
             log.info("Current branch {}", branch);
             log.info("Your branch is up to date with {}.", fullBranch);
             log.info("");
@@ -127,7 +127,7 @@ public class GitUtils {
         git.add().addFilepattern(".").call();
         log.info("git add .");
         // git commit -m "Committed by halo automatically."
-        final var commit = git.commit()
+        final RevCommit commit = git.commit()
             .setSign(false)
             .setAuthor("halo", "hi@halo.run")
             .setMessage("Committed by halo automatically.")

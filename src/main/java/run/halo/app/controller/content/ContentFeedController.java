@@ -279,7 +279,7 @@ public class ContentFeedController {
     private Timestamp getLastModifiedTime(List<PostDetailVO> posts) {
         OptionalLong lastModifiedTimestamp =
             posts.stream().mapToLong(post -> post.getEditTime().getTime()).max();
-        if (lastModifiedTimestamp.isEmpty()) {
+        if (!lastModifiedTimestamp.isPresent()) {
             return new Timestamp(System.currentTimeMillis());
         }
         return new Timestamp(lastModifiedTimestamp.getAsLong());

@@ -31,11 +31,11 @@ public class DefaultErrorController extends BasicErrorController {
 
     @Override
     protected HttpStatus getStatus(HttpServletRequest request) {
-        var status = super.getStatus(request);
+        HttpStatus status = super.getStatus(request);
         // deduce status
-        var exception = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+        Object exception = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
         if (exception instanceof NestedServletException) {
-            var nse = (NestedServletException) exception;
+            NestedServletException nse = (NestedServletException) exception;
             if (nse.getCause() instanceof AbstractHaloException) {
                 status = resolveHaloException((AbstractHaloException) nse.getCause(), request);
             }

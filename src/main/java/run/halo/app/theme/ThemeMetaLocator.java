@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 
@@ -58,7 +59,7 @@ public enum ThemeMetaLocator {
     @NonNull
     public Optional<Path> locateProperty(@NonNull Path path) {
         try {
-            var predicate = ((Predicate<Path>)
+            Predicate<Path> predicate = ((Predicate<Path>)
                 Files::isRegularFile)
                 .and(Files::isReadable)
                 .and(
@@ -81,7 +82,7 @@ public enum ThemeMetaLocator {
     public Optional<Path> locateSetting(@NonNull Path path) {
         return locateThemeRoot(path).flatMap(root -> {
                 try {
-                    var predicate = ((Predicate<Path>)
+                    Predicate<Path> predicate = ((Predicate<Path>)
                         Files::isRegularFile)
                         .and(Files::isReadable)
                         .and(p -> equalsAnyIgnoreCase(p.getFileName().toString(),
@@ -105,8 +106,8 @@ public enum ThemeMetaLocator {
     @NonNull
     public Optional<Path> locateScreenshot(@NonNull Path path) {
         return locateThemeRoot(path).flatMap(root -> {
-            try (var pathStream = Files.list(root)) {
-                var predicate = ((Predicate<Path>) Files::isRegularFile)
+            try (Stream<Path> pathStream = Files.list(root)) {
+                Predicate<Path> predicate = ((Predicate<Path>) Files::isRegularFile)
                     .and(Files::isReadable)
                     .and(p -> p.getFileName().toString().startsWith(THEME_SCREENSHOTS_NAME));
                 log.debug("Locating screenshot from path: {}", path);

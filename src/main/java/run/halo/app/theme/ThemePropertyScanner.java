@@ -44,6 +44,7 @@ public enum ThemePropertyScanner {
             if (Files.notExists(themePath)) {
                 Files.createDirectories(themePath);
             }
+            log.info("find theme path:{}, themeId:{}", themePath, activeThemeId);
         } catch (IOException e) {
             log.error("Failed to create directory: " + themePath, e);
             return Collections.emptyList();
@@ -87,13 +88,14 @@ public enum ThemePropertyScanner {
         Assert.notNull(themeRootPath, "Theme path must not be null");
 
         return ThemeMetaLocator.INSTANCE.locateProperty(themeRootPath).map(propertyPath -> {
-            final var rootPath = propertyPath.getParent();
+            final Path rootPath = propertyPath.getParent();
             try {
                 // Get property content
-                final var propertyContent = Files.readString(propertyPath);
+                byte[] bytes = Files.readAllBytes(propertyPath);
+                final String propertyContent = new String(bytes);
 
                 // Resolve the base properties
-                final var themeProperty = propertyResolver.resolve(propertyContent);
+                final ThemeProperty themeProperty = propertyResolver.resolve(propertyContent);
 
                 // Resolve additional properties
                 themeProperty.setThemePath(rootPath.toString());
@@ -103,7 +105,7 @@ public enum ThemePropertyScanner {
 
                 // resolve screenshot
                 ThemeMetaLocator.INSTANCE.locateScreenshot(rootPath).ifPresent(screenshotPath -> {
-                    final var screenshotRelPath = StringUtils.join("/themes/",
+                    final String screenshotRelPath = StringUtils.join("/themes/",
                             themeProperty.getFolderName(),
                             "/",
                             screenshotPath.getFileName().toString());
