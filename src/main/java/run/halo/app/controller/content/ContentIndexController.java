@@ -40,6 +40,7 @@ public class ContentIndexController {
 
 
     /**
+     * todo 首页
      * Render blog index
      *
      * @param p post id
@@ -49,6 +50,7 @@ public class ContentIndexController {
     @GetMapping
     public String index(Integer p, String token, Model model) {
 
+        log.info("反问index");
         PostPermalinkType permalinkType = optionService.getPostPermalinkType();
 
         if (PostPermalinkType.ID.equals(permalinkType) && !Objects.isNull(p)) {

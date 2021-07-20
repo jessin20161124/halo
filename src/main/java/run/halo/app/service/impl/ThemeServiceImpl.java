@@ -299,6 +299,7 @@ public class ThemeServiceImpl implements ThemeService {
 
     @Override
     public String render(String pageName) {
+        // todo 实时获取theme
         String folderName = getActivatedTheme().getFolderName();
         return "themes/" + folderName + "/" + pageName;
     }

@@ -99,6 +99,7 @@ public class AdminAuthenticationFilter extends AbstractAuthenticationFilter {
         }
 
         // Get user id from cache
+        // todo 登陆后，会把token和userId关联起来
         Optional<Integer> optionalUserId =
             cacheStore.getAny(SecurityUtils.buildTokenAccessKey(token), Integer.class);
 

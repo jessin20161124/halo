@@ -36,6 +36,7 @@ import run.halo.app.utils.FileUtils;
 
 /**
  * Theme repository implementation.
+ * todo 全都是本地文件夹操作
  *
  * @author johnniang
  */
@@ -72,12 +73,12 @@ public class ThemeRepositoryImpl
             AtomicBoolean fallbackTheme = new AtomicBoolean(false);
             synchronized (this) {
                 if (this.currentTheme == null) {
-                    // get current theme id
+                    // get current theme id todo 从db中查询到这个key的值
                     String currentThemeId = this.optionRepository.findByKey(THEME.getValue())
                         .map(Option::getValue)
                         .orElse(DEFAULT_THEME_ID);
 
-                    // fetch current theme
+                    // fetch current theme todo 从本地文件夹找到这个theme文件夹，id为theme.yaml中配置了
                     this.currentTheme =
                         this.fetchThemeByThemeId(currentThemeId).orElseGet(() -> {
                             if (!StringUtils.equalsIgnoreCase(currentThemeId, DEFAULT_THEME_ID)) {
