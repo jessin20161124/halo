@@ -33,6 +33,7 @@ public class PostParam implements InputConverter<Post> {
 
     private PostStatus status = PostStatus.DRAFT;
 
+    // todo 别名
     @Size(max = 255, message = "文章别名的字符长度不能超过 {max}")
     private String slug;
 

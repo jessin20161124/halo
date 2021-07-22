@@ -12,6 +12,7 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractVisitEvent extends ApplicationEvent {
 
+    private final String clientIp;
     private final Integer id;
 
     /**
@@ -20,15 +21,20 @@ public abstract class AbstractVisitEvent extends ApplicationEvent {
      * @param source the object on which the event initially occurred (never {@code null})
      * @param id id
      */
-    public AbstractVisitEvent(@NonNull Object source, @NonNull Integer id) {
+    public AbstractVisitEvent(@NonNull Object source, String clientIp, @NonNull Integer id) {
         super(source);
 
         Assert.notNull(id, "Id must not be null");
+        this.clientIp = clientIp;
         this.id = id;
     }
 
     @NonNull
     public Integer getId() {
         return id;
+    }
+
+    public String getClientIp() {
+        return clientIp;
     }
 }

@@ -87,7 +87,7 @@ public class PostModel {
         this.authenticationService = authenticationService;
     }
 
-    public String content(Post post, String token, Model model) {
+    public String content(Post post, String token, Model model, String clientIp) {
         if (PostStatus.RECYCLE.equals(post.getStatus())) {
             // Articles in the recycle bin are not allowed to be accessed.
             throw new NotFoundException("查询不到该文章的信息");
@@ -125,7 +125,7 @@ public class PostModel {
             post.setFormatContent(post.getOriginalContent());
         }
 
-        postService.publishVisitEvent(post.getId());
+        postService.publishVisitEvent(clientIp, post.getId());
 
         postService.getPrevPost(post).ifPresent(
             prevPost -> model.addAttribute("prevPost", postService.convertToDetailVo(prevPost)));

@@ -18,8 +18,8 @@ public class PostVisitEvent extends AbstractVisitEvent {
      * @param source the object on which the event initially occurred (never {@code null})
      * @param postId post id must not be null
      */
-    public PostVisitEvent(Object source, @NonNull Integer postId) {
-        super(source, postId);
+    public PostVisitEvent(Object source, String clientIp, @NonNull Integer postId) {
+        super(source, clientIp, postId);
         Assert.isTrue(!ServiceUtils.isEmptyId(postId), "Post id must not be empty");
     }
 }

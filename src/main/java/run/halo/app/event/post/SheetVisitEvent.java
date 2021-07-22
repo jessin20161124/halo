@@ -15,6 +15,6 @@ public class SheetVisitEvent extends AbstractVisitEvent {
      * @param sheetId sheet id must not be null
      */
     public SheetVisitEvent(Object source, Integer sheetId) {
-        super(source, sheetId);
+        super(source, "", sheetId);
     }
 }

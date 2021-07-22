@@ -12,6 +12,8 @@ import run.halo.app.model.entity.Post;
 import run.halo.app.model.enums.PostPermalinkType;
 import run.halo.app.service.OptionService;
 import run.halo.app.service.PostService;
+import run.halo.app.utils.ServletUtils;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Blog index page controller
@@ -48,14 +50,16 @@ public class ContentIndexController {
      * @return template path: themes/{theme}/index.ftl
      */
     @GetMapping
-    public String index(Integer p, String token, Model model) {
+    public String index(Integer p, String token, Model model, HttpServletRequest httpServletRequest) {
 
-        log.info("反问index");
+        log.info("访问index");
+        String clientIp = ServletUtils.getRequestIp();
+
         PostPermalinkType permalinkType = optionService.getPostPermalinkType();
 
         if (PostPermalinkType.ID.equals(permalinkType) && !Objects.isNull(p)) {
             Post post = postService.getById(p);
-            return postModel.content(post, token, model);
+            return postModel.content(post, token, model, clientIp);
         }
 
         return this.index(model, 1);

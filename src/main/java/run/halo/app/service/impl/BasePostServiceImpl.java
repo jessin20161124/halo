@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,9 +28,11 @@ import run.halo.app.model.dto.post.BasePostDetailDTO;
 import run.halo.app.model.dto.post.BasePostMinimalDTO;
 import run.halo.app.model.dto.post.BasePostSimpleDTO;
 import run.halo.app.model.entity.BasePost;
+import run.halo.app.model.entity.ClientPostVisit;
 import run.halo.app.model.enums.PostEditorType;
 import run.halo.app.model.enums.PostStatus;
 import run.halo.app.model.properties.PostProperties;
+import run.halo.app.repository.ClientPostVisitRepository;
 import run.halo.app.repository.base.BasePostRepository;
 import run.halo.app.service.OptionService;
 import run.halo.app.service.base.AbstractCrudService;
@@ -38,6 +41,7 @@ import run.halo.app.utils.DateUtils;
 import run.halo.app.utils.HaloUtils;
 import run.halo.app.utils.MarkdownUtils;
 import run.halo.app.utils.ServiceUtils;
+import javax.annotation.Resource;
 
 /**
  * Base post service implementation.
@@ -53,6 +57,9 @@ public abstract class BasePostServiceImpl<POST extends BasePost>
     private final BasePostRepository<POST> basePostRepository;
 
     private final OptionService optionService;
+
+    @Resource
+    private ClientPostVisitRepository clientPostVisitRepository;
 
     private static final Pattern summaryPattern = Pattern.compile("\t|\r|\n");
 
@@ -246,6 +253,19 @@ public abstract class BasePostServiceImpl<POST extends BasePost>
             throw new BadRequestException(
                 "Failed to increase visits " + visits + " for post with id " + postId);
         }
+    }
+
+    @Override
+    @Transactional
+    public void increaseVisit(String clientIp, @NonNull Integer postId) {
+        Assert.notNull(postId, "Post id must not be null");
+        ClientPostVisit clientPostVisit = ClientPostVisit.builder().clientIp(clientIp).postId(postId).build();
+
+        if (basePostRepository.getByIdAndStatus(postId, PostStatus.DRAFT).isPresent()
+            || clientPostVisitRepository.exists(Example.of(clientPostVisit))) {
+            return;
+        }
+        clientPostVisitRepository.save(clientPostVisit);
     }
 
     @Override

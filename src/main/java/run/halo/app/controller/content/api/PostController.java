@@ -2,6 +2,7 @@ package run.halo.app.controller.content.api;
 
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
+import cn.hutool.extra.servlet.ServletUtil;
 import io.swagger.annotations.ApiOperation;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -38,6 +39,8 @@ import run.halo.app.model.vo.PostListVO;
 import run.halo.app.service.OptionService;
 import run.halo.app.service.PostCommentService;
 import run.halo.app.service.PostService;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Content post controller.
@@ -103,7 +106,7 @@ public class PostController {
         @RequestParam(value = "formatDisabled", required = false, defaultValue = "true")
             Boolean formatDisabled,
         @RequestParam(value = "sourceDisabled", required = false, defaultValue = "false")
-            Boolean sourceDisabled) {
+            Boolean sourceDisabled, HttpServletRequest request) {
         PostDetailVO postDetailVO = postService.convertToDetailVo(postService.getById(postId));
 
         if (formatDisabled) {
@@ -116,7 +119,9 @@ public class PostController {
             postDetailVO.setOriginalContent(null);
         }
 
-        postService.publishVisitEvent(postDetailVO.getId());
+        final String remoteAddr = ServletUtil.getClientIP(request);
+
+        postService.publishVisitEvent(remoteAddr, postDetailVO.getId());
 
         return postDetailVO;
     }
@@ -127,7 +132,7 @@ public class PostController {
         @RequestParam(value = "formatDisabled", required = false, defaultValue = "true")
             Boolean formatDisabled,
         @RequestParam(value = "sourceDisabled", required = false, defaultValue = "false")
-            Boolean sourceDisabled) {
+            Boolean sourceDisabled, HttpServletRequest request) {
         PostDetailVO postDetailVO = postService.convertToDetailVo(postService.getBySlug(slug));
 
         if (formatDisabled) {
@@ -139,8 +144,9 @@ public class PostController {
             // Clear the original content
             postDetailVO.setOriginalContent(null);
         }
+        final String remoteAddr = ServletUtil.getClientIP(request);
 
-        postService.publishVisitEvent(postDetailVO.getId());
+        postService.publishVisitEvent(remoteAddr, postDetailVO.getId());
 
         return postDetailVO;
     }

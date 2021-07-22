@@ -300,7 +300,7 @@ public interface PostService extends BasePostService<Post> {
      *
      * @param postId postId must not be null
      */
-    void publishVisitEvent(@NonNull Integer postId);
+    void publishVisitEvent(String clientIp, @NonNull Integer postId);
 
     /**
      * Get Post Pageable default sort

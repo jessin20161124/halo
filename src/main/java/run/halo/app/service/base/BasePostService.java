@@ -171,6 +171,9 @@ public interface BasePostService<POST extends BasePost> extends CrudService<POST
      */
     void increaseVisit(@NonNull Integer postId);
 
+    void increaseVisit(String clientIp, @NonNull Integer postId);
+
+
     /**
      * Increase post likes.
      *

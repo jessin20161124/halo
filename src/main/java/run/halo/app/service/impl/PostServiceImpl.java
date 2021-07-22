@@ -42,6 +42,7 @@ import run.halo.app.exception.NotFoundException;
 import run.halo.app.model.dto.post.BasePostMinimalDTO;
 import run.halo.app.model.dto.post.BasePostSimpleDTO;
 import run.halo.app.model.entity.Category;
+import run.halo.app.model.entity.ClientPostVisit;
 import run.halo.app.model.entity.Post;
 import run.halo.app.model.entity.PostCategory;
 import run.halo.app.model.entity.PostComment;
@@ -60,6 +61,7 @@ import run.halo.app.model.vo.ArchiveYearVO;
 import run.halo.app.model.vo.PostDetailVO;
 import run.halo.app.model.vo.PostListVO;
 import run.halo.app.model.vo.PostMarkdownVO;
+import run.halo.app.repository.ClientPostVisitRepository;
 import run.halo.app.repository.PostRepository;
 import run.halo.app.repository.base.BasePostRepository;
 import run.halo.app.service.AuthorizationService;
@@ -919,8 +921,8 @@ public class PostServiceImpl extends BasePostServiceImpl<Post> implements PostSe
     }
 
     @Override
-    public void publishVisitEvent(Integer postId) {
-        eventPublisher.publishEvent(new PostVisitEvent(this, postId));
+    public void publishVisitEvent(String clientIp, Integer postId) {
+        eventPublisher.publishEvent(new PostVisitEvent(this, clientIp, postId));
     }
 
     @Override

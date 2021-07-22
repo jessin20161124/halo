@@ -8,9 +8,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 import run.halo.app.event.post.AbstractVisitEvent;
+import run.halo.app.repository.ClientPostVisitRepository;
 import run.halo.app.service.base.BasePostService;
+import javax.annotation.Resource;
 
 /**
  * Abstract visit event listener.
@@ -26,6 +29,7 @@ public abstract class AbstractVisitEventListener {
     private final Map<Integer, PostVisitTask> visitTaskMap;
 
     private final BasePostService basePostService;
+
 
     private final ExecutorService executor;
 
@@ -60,6 +64,10 @@ public abstract class AbstractVisitEventListener {
 
         log.debug("Received a visit event, post id: [{}]", id);
 
+        if (!StringUtils.isBlank(event.getClientIp())) {
+            basePostService.increaseVisit(event.getClientIp(), id);
+        }
+
         // Get post visit queue
         BlockingQueue<Integer> postVisitQueue =
             visitQueueMap.computeIfAbsent(id, this::createEmptyQueue);
@@ -77,7 +85,7 @@ public abstract class AbstractVisitEventListener {
         // Start a post visit task
         executor.execute(postVisitTask);
 
-        log.debug("Created a new post visit task for post id: [{}]", postId);
+        log.info("Created a new post visit task for post id: [{}]", postId);
         return postVisitTask;
     }
 

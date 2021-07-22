@@ -59,6 +59,7 @@ logging:
     run.halo.app: INFO
     org.eclipse.jetty.server.HttpChannel: ERROR
   file:
+    # 取值于下面的参数halo/work-dir
     path: ${halo.work-dir}/logs
 
 springfox:
@@ -68,4 +69,5 @@ springfox:
 halo:
   download-timeout: 5m
   cache: memory
+  # todo 启动用户的目录
   work-dir: ${user.home}/.halo/

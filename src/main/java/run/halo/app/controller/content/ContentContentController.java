@@ -39,6 +39,7 @@ import run.halo.app.service.CategoryService;
 import run.halo.app.service.OptionService;
 import run.halo.app.service.PostService;
 import run.halo.app.service.SheetService;
+import run.halo.app.utils.ServletUtils;
 
 /**
  * @author ryanwang
@@ -153,17 +154,18 @@ public class ContentContentController {
     public String content(@PathVariable("prefix") String prefix,
         @PathVariable("slug") String slug,
         @RequestParam(value = "token", required = false) String token,
-        Model model) {
+        Model model, HttpServletRequest httpServletRequest) {
         PostPermalinkType postPermalinkType = optionService.getPostPermalinkType();
+        String clientIp = ServletUtils.getRequestIp();
         if (optionService.getArchivesPrefix().equals(prefix)) {
             if (postPermalinkType.equals(PostPermalinkType.DEFAULT)) {
                 Post post = postService.getBySlug(slug);
-                return postModel.content(post, token, model);
+                return postModel.content(post, token, model, clientIp);
             }
             if (postPermalinkType.equals(PostPermalinkType.ID_SLUG)
                 && StringUtils.isNumeric(slug)) {
                 Post post = postService.getById(Integer.parseInt(slug));
-                return postModel.content(post, token, model);
+                return postModel.content(post, token, model, clientIp);
             }
         }
 
@@ -178,7 +180,7 @@ public class ContentContentController {
         if (postPermalinkType.equals(PostPermalinkType.YEAR) && prefix.length() == 4
             && StringUtils.isNumeric(prefix)) {
             Post post = postService.getBy(Integer.parseInt(prefix), slug);
-            return postModel.content(post, token, model);
+            return postModel.content(post, token, model, clientIp);
         }
 
         if (optionService.getSheetPermalinkType().equals(SheetPermalinkType.SECONDARY)
@@ -211,11 +213,13 @@ public class ContentContentController {
         @PathVariable("month") Integer month,
         @PathVariable("slug") String slug,
         @RequestParam(value = "token", required = false) String token,
-        Model model) {
+        Model model, HttpServletRequest request) {
+        String clientIp = ServletUtils.getRequestIp();
+
         PostPermalinkType postPermalinkType = optionService.getPostPermalinkType();
         if (postPermalinkType.equals(PostPermalinkType.DATE)) {
             Post post = postService.getBy(year, month, slug);
-            return postModel.content(post, token, model);
+            return postModel.content(post, token, model, clientIp);
         }
 
         throw buildPathNotFoundException();
@@ -227,11 +231,12 @@ public class ContentContentController {
         @PathVariable("day") Integer day,
         @PathVariable("slug") String slug,
         @RequestParam(value = "token", required = false) String token,
-        Model model) {
+        Model model, HttpServletRequest request) {
+        String clientIp = ServletUtils.getRequestIp();
         PostPermalinkType postPermalinkType = optionService.getPostPermalinkType();
         if (postPermalinkType.equals(PostPermalinkType.DAY)) {
             Post post = postService.getBy(year, month, day, slug);
-            return postModel.content(post, token, model);
+            return postModel.content(post, token, model, clientIp);
         }
 
         throw buildPathNotFoundException();
