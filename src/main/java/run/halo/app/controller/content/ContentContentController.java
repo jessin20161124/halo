@@ -183,6 +183,7 @@ public class ContentContentController {
             return postModel.content(post, token, model, clientIp);
         }
 
+        // todo s/about页面走这里
         if (optionService.getSheetPermalinkType().equals(SheetPermalinkType.SECONDARY)
             && optionService.getSheetPrefix().equals(prefix)) {
             Sheet sheet = sheetService.getBySlug(slug);
