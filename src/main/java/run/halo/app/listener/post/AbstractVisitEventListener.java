@@ -62,7 +62,7 @@ public abstract class AbstractVisitEventListener {
         // Get post id
         Integer id = event.getId();
 
-        log.debug("Received a visit event, post id: [{}]", id);
+        log.info("Received a visit event, post id: [{}]", id);
 
         if (!StringUtils.isBlank(event.getClientIp())) {
             basePostService.increaseVisit(event.getClientIp(), id);
@@ -85,7 +85,6 @@ public abstract class AbstractVisitEventListener {
         // Start a post visit task
         executor.execute(postVisitTask);
 
-        log.info("Created a new post visit task for post id: [{}]", postId);
         return postVisitTask;
     }
 
@@ -113,7 +112,7 @@ public abstract class AbstractVisitEventListener {
                     BlockingQueue<Integer> postVisitQueue = visitQueueMap.get(id);
                     Integer postId = postVisitQueue.take();
 
-                    log.debug("Took a new visit for post id: [{}]", postId);
+                    log.info("Took a new visit for post id: [{}]", postId);
 
                     // Increase the visit
                     basePostService.increaseVisit(postId);

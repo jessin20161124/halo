@@ -263,8 +263,10 @@ public abstract class BasePostServiceImpl<POST extends BasePost>
 
         if (basePostRepository.getByIdAndStatus(postId, PostStatus.DRAFT).isPresent()
             || clientPostVisitRepository.exists(Example.of(clientPostVisit))) {
-            return;
+            log.info("clientIp:{}，已经访问过blog:{}", clientIp, postId);
+           return;
         }
+        log.info("clientIp:{}，第一次访问blog:{}", clientIp, postId);
         clientPostVisitRepository.save(clientPostVisit);
     }
 
